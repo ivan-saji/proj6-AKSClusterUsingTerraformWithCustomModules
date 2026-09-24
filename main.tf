@@ -41,3 +41,18 @@ resource "azurerm_key_vault_secret" "sp_client_secret" {
   value        = module.service_principal.client_secret
   key_vault_id = module.keyvault.keyvault_id
 }
+
+#Calling AKS Module
+
+module "aks" {
+  source              = "./modules/aks"
+  aks_name            = var.aks_name
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  dns_prefix          = var.dns_prefix
+  node_count          = var.node_count
+  vm_size             = var.vm_size
+
+  depends_on = [azurerm_key_vault_secret.sp_client_secret,
+  azurerm_role_assignment.aks_sp_role]
+}
