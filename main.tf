@@ -56,3 +56,13 @@ module "aks" {
   depends_on = [azurerm_key_vault_secret.sp_client_secret,
   azurerm_role_assignment.aks_sp_role]
 }
+
+#Kubeconfig local file
+
+resource "local_file" "kubeconfig" {
+  content         = module.aks.kube_config_raw
+  filename        = "${path.module}/kubeconfig"
+  file_permission = "0600"
+
+  depends_on = [module.aks]
+}
