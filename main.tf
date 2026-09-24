@@ -34,12 +34,25 @@ module "keyvault" {
   depends_on = [azurerm_role_assignment.aks_sp_role]
 }
 
+resource "azurerm_role_assignment" "terraform_kv_secrets" {
+  scope                = module.keyvault.keyvault_id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+
+  depends_on = [
+    module.keyvault
+  ]
+}
 #Keyvault secret for Service Principal Client Secret
 
 resource "azurerm_key_vault_secret" "sp_client_secret" {
   name         = "sp-client-secret"
   value        = module.service_principal.client_secret
   key_vault_id = module.keyvault.keyvault_id
+
+  depends_on = [
+    azurerm_role_assignment.terraform_kv_secrets
+  ]
 }
 
 #Calling AKS Module
