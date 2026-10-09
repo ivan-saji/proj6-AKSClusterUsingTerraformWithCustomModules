@@ -31,7 +31,11 @@ module "keyvault" {
   resource_group_name = azurerm_resource_group.rg.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
 
-  depends_on = [azurerm_role_assignment.aks_sp_role]
+  service_principal_name = var.application_name
+  service_principal_object_id = module.service_principal.object_id
+  service_principal_tenant_id = module.service_principal.service_principal_tenant_id
+
+  depends_on = [module.service_principal]
 }
 
 resource "azurerm_role_assignment" "terraform_kv_secrets" {
@@ -51,23 +55,25 @@ resource "azurerm_key_vault_secret" "sp_client_secret" {
   key_vault_id = module.keyvault.keyvault_id
 
   depends_on = [
-    azurerm_role_assignment.terraform_kv_secrets
+    module.keyvault
   ]
 }
 
 #Calling AKS Module
 
 module "aks" {
-  source              = "./modules/aks"
-  aks_name            = var.aks_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  dns_prefix          = var.dns_prefix
-  node_count          = var.node_count
-  vm_size             = var.vm_size
+  source                = "./modules/aks"
+  service_principal_name = var.application_name
+  client_id             = module.service_principal.client_id
+  client_secret         = module.service_principal.client_secret
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  aks_name              = var.aks_name
+  vm_size               = var.vm_size
+  node_count            = var.node_count
+  dns_prefix            = var.dns_prefix
 
-  depends_on = [azurerm_key_vault_secret.sp_client_secret,
-  azurerm_role_assignment.aks_sp_role]
+  depends_on = [module.service_principal]
 }
 
 #Kubeconfig local file
