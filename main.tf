@@ -31,7 +31,7 @@ module "keyvault" {
   resource_group_name = azurerm_resource_group.rg.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
 
-  service_principal_name = var.application_name
+  service_principal_name      = var.application_name
   service_principal_object_id = module.service_principal.object_id
   service_principal_tenant_id = module.service_principal.service_principal_tenant_id
 
@@ -55,23 +55,23 @@ resource "azurerm_key_vault_secret" "sp_client_secret" {
   key_vault_id = module.keyvault.keyvault_id
 
   depends_on = [
-    module.keyvault
+    azurerm_role_assignment.terraform_kv_secrets
   ]
 }
 
 #Calling AKS Module
 
 module "aks" {
-  source                = "./modules/aks"
+  source                 = "./modules/aks"
   service_principal_name = var.application_name
-  client_id             = module.service_principal.client_id
-  client_secret         = module.service_principal.client_secret
-  location              = azurerm_resource_group.rg.location
-  resource_group_name   = azurerm_resource_group.rg.name
-  aks_name              = var.aks_name
-  vm_size               = var.vm_size
-  node_count            = var.node_count
-  dns_prefix            = var.dns_prefix
+  client_id              = module.service_principal.client_id
+  client_secret          = module.service_principal.client_secret
+  location               = azurerm_resource_group.rg.location
+  resource_group_name    = azurerm_resource_group.rg.name
+  aks_name               = var.aks_name
+  vm_size                = var.vm_size
+  node_count             = var.node_count
+  dns_prefix             = var.dns_prefix
 
   depends_on = [module.service_principal]
 }

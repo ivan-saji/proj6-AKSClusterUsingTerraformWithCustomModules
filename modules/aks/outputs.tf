@@ -13,5 +13,8 @@ output "kube_config_raw" {
 
 output "kublet_identity_object_id" {
   description = "The kublet identity of the AKS cluster."
-  value       = azurerm_kubernetes_cluster.aks_cluster.kubelet_identity[0].object_id
+  value = try(
+    azurerm_kubernetes_cluster.aks_cluster.kubelet_identity[0].object_id,
+    null
+  )
 }

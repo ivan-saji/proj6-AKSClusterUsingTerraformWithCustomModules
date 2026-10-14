@@ -37,3 +37,8 @@ variable "vm_size" {
   description = "VM size for AKS nodes"
   type        = string
 }
+
+variable "ssh_public_key" {
+  description = "Path to the SSH public key for AKS nodes"
+  type        = string
+}

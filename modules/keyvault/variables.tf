@@ -19,7 +19,7 @@ variable "tenant_id" {
 }
 
 variable "service_principal_name" {
-    type = string
+  type = string
 }
 
 variable "service_principal_object_id" {}
